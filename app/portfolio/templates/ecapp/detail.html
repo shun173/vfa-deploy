@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="card" id="product">
+    <div class="row no-gutters">
+        <aside class="col-md-6 d-flex align-items-center">
+            <img class="img-lg d-block mx-auto" src="{{ product.image.url }}" alt="">
+        </aside>
+        <main class="col-md-6 border-left p-2">
+            {% if product.owner == request.user %}
+            <form action="{% url 'ecapp:delete' product.id %}" method="post" class="float-right">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
+            </form>
+            {% endif %}
+            <product-good ref="{{ product.id }}" data-id="{{ product.id }}"
+                data-authenticated="{{ request.user.is_authenticated }}"></product-good>
+
+            <article class="content-body">
+                <h1 class="">{{ product.name }}</h1>
+                <ul style="list-style: none;" class="pl-0 my-2 d-inline-block">
+                    <li class="d-inline-block">
+                        <star-icon :eval="eval" data-id="1" data-eval="{{ evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="2" data-eval="{{ evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="3" data-eval="{{ evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="4" data-eval="{{ evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="5" data-eval="{{ evaluation }}"></star-icon>
+                    </li>
+                </ul>
+                <span class="small text-muted">(評価数: <strong>{{review_num}}</strong>)</span>
+                <div class="mb-3">
+                    <h4><var>{{ product.price | intcomma }}</var>point</h4>
+                </div>
+                <p>{{ product.description }}</p>
+                <p class="text-muted d-inline-block mb-0">在庫：　{{ product.amount }}個</p>
+                <span class="float-right mr-2">出品者：<a
+                        href="{% url 'users:user_detail' product.owner.id %}">{{ product.owner.name }}</a>
+                </span>
+                <hr>
+                {% if request.user.is_authenticated %}
+                <form action="{% url 'ecapp:detail' product.id %}" method="post">{% csrf_token %}
+                    {{ add_to_cart_form.as_p }}
+                    <button type="submit" name="buy_now" class="btn btn-primary">今すぐ購入</button>
+                    <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#cart">
+                        <span class="text">カートに入れる</span>
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                    <div class="modal fade" id="cart">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-info">
+                                    <h5 class="modal-title text-light">この商品をご購入された方はこちらの商品もよくご購入されています</h5>
+                                    <button type="button" class="close" data-dismiss="modal">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    {% if recommend_products %}
+                                    <div class="row mx-2">
+                                        {% for recommend_product in recommend_products %}
+                                        <figure class="card card-product-grid shadow-sm col-md-3">
+                                            <button type="submit" name="product" value="{{ recommend_product.id }}"
+                                                class="btn btn-link">
+                                                <div class="img-wrap">
+                                                    <a href="{% url 'ecapp:detail' recommend_product.id %}">
+                                                        <img src="{{ recommend_product.image.url }}"
+                                                            class="img-fluid img-lg"></a>
+                                                </div>
+                                                <figcaption class="info-wrap text-center border-top">
+                                                    <a href="{% url 'ecapp:detail' recommend_product.id %}"
+                                                        class="title text-truncate d-block">{{ recommend_product.name }}</a>
+                                                    <small class="text-muted">在庫: {{ recommend_product.amount }}</small>
+                                                    <div class="price mt-2">
+                                                        <strong>{{ recommend_product.price | intcomma }}</strong>point
+                                                    </div>
+                                                </figcaption>
+                                            </button>
+                                        </figure>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <p>この商品の購入履歴はありません</p>
+                                    {% endif %}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" name="go_on" class="btn btn-outline-primary">買い物を続ける</button>
+                                    <button type="submit" name="to_cart" class="btn btn-primary">
+                                        <span class="text">カートへ</span>
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                {% else %}
+                <a href="{% url 'users:login' %}?next={{ request.path }}">
+                    <button class="btn btn-primary">ログインして購入する</button>
+                </a>
+                {% endif %}
+            </article>
+        </main>
+    </div>
+</div>
+
+<div class="container-fulid px-3 mb-5 mt-3">
+    <div class="container bg-info rounded-lg">
+        <h2 class="text-light d-inline-block ml-3 my-1">
+            {{ product.name }}<small>に関する記事</small>
+        </h2>
+    </div>
+    <div class="container pt-3 border border-info rounded" id=article>
+        {% if not articles %}
+        <h5 class="text-center font-weight-bold text-muted mb-4 mt-1">未投稿</h5>
+        {% else %}
+        {% for article in articles %}
+        <div class="media row mb-3 border-bottom border-info p-3 shadow-sm">
+            <div class="col-2"></div>
+            <div class="media-body col-10">
+                {% if article.author == request.user %}
+                <form action="{% url 'snsapp:delete' article.id %}" method="post" class="float-right ml-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input class="btn btn-outline-danger" type="submit" next="{{ next }}"
+                        onclick="return confirm('本当に削除しますか？');" value="削除">
+                </form>
+                {% endif %}
+                <p>{{ article.content }}</p>
+                <ul style="list-style: none;" class="pl-0">
+                    <li class="d-inline-block">
+                        <star-icon :eval="eval" data-id="1" data-eval="{{ article.evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="2" data-eval="{{ article.evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="3" data-eval="{{ article.evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="4" data-eval="{{ article.evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="5" data-eval="{{ article.evaluation }}"></star-icon>
+                    </li>
+                </ul>
+                <div class="mt-auto float-right">
+                    <div class="d-flex align-items-end">
+                        <span class="font-italic mr-2">{{ article.created_at | date:"Y/m/d f" }}</span>
+                        by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.name }}</a>
+                    </div>
+                </div>
+            </div>
+            <article-good id="good" ref="{{ article.id }}" data-id="{{ article.id }}"
+                data-count="{{ article.good_count }}" data-authenticated="{{ request.user.is_authenticated }}">
+            </article-good>
+        </div>
+        {% endfor %}
+        <div class="text-center mb-2">
+            <a href="{% url 'ecapp:detail' product.id %}?articles={{ article_num }}">
+                <button class="border border-0 bg-white"><i class="fas fa-angle-double-down fa-3x"
+                        style="color: darkcyan;"></i></button></a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="https://kit.fontawesome.com/c25d00f6dc.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+<script type="text/javascript" src="{% static 'js/display_eval.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/product.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/article.js' %}"></script>
+{% endblock %}

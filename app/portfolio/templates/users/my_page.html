@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fulid border rounded mb-3">
+    <div class="container row">
+        {% if request.user.icon %}
+        <img class="col-2 img-thumbnail rounded-circle m-1" src="{{ request.user.icon.url }}" alt="">
+        {% else %}
+        <img class="col-2 img-thumbnail rounded-circle m-1" src="{% static 'default_icon.jpg' %}" alt="">
+        {% endif %}
+        <div class="col-9 ml-auto d-flex align-items-center">
+            <p class="d-inline-block m-1 text-center">{{ request.user.message }}</p>
+        </div>
+    </div>
+    <table class="table m-0">
+        <tr>
+            <th>アカウント名</th>
+            <td>{{ request.user.name }}</td>
+        </tr>
+        <tr>
+            <th>Eメールアドレス</th>
+            <td>{{ request.user.email }}</td>
+        </tr>
+        <tr>
+            <th>住所</th>
+            <td>{{ request.user.address }}</td>
+        </tr>
+        <tr>
+            <th>ポイント</th>
+            <td>{{ request.user.point }}<span class="d-block ml-auto"><a class="text-muted small"
+                        href="{% url 'users:questionnaire' %}">※アンケートに答えてポイントゲット</a></span>
+                <div class="float-right">
+                    <a class="btn btn-secondary" href="{% url 'users:edit_profile' %}">アカウント情報を変更</a>
+                    <a class="btn btn-secondary" href="{% url 'users:password_change' %}">パスワードを変更</a>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</div>
+<div class="container-fluid mb-3">
+    <ul class="list-group">
+        <li class="list-group-item text-center">
+            <a class="text-secondary" href="{% url 'snsapp:my_articles' %}?page=1">自身の記事</a>
+        </li>
+        <li class="list-group-item text-center">
+            <a class="text-secondary" href="{% url 'ecapp:my_products' %}?page=1">自身の出品</a>
+        </li>
+        <li class="list-group-item text-center">
+            <a class="text-secondary" href="{% url 'ecapp:fav_products' %}?page=1">お気に入り商品</a>
+        </li>
+        <li class="list-group-item text-center">
+            <a class="text-secondary" href="{% url 'ecapp:cart' 0 %}?page=1">カート</a>
+        </li>
+        <li class="list-group-item text-center">
+            <a class="text-secondary" href="{% url 'ecapp:order_history' %}?page=1">注文履歴</a>
+        </li>
+        <li class="list-group-item text-center">
+            <a class="text-secondary" href="{% url 'users:friend_list' %}?page=1">友人一覧</a>
+        </li>
+        <li class="list-group-item text-center">
+            <a class="text-secondary" href="{% url 'users:point_history' %}?page=1">ポイント履歴</a>
+        </li>
+    </ul>
+</div>
+
+{% endblock %}

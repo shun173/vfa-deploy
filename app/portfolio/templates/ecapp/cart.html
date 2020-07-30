@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load filters %}
+
+{% block content %}
+
+<div class="alert alert-danger">
+    {% if which_cart == 0 %}
+    <h3>カート</h3>
+    {% else %}
+    <h3>カート外から購入</h3>
+    {% endif %}
+</div>
+
+<div class="row">
+    <aside class="col-lg-9">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-borderless table-shopping-cart">
+                    <thead class="text-muted">
+                        <tr class="small text-uppercase">
+                            <th scope="col">Product</th>
+                            <th scope="col" width="120">Quantity</th>
+                            <th scope="col" width="120">Price</th>
+                            <th scope="col" class="text-right d-none d-md-block" width="200"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product, num in cart_products.items %}
+                        <tr>
+                            <td>
+                                <figure class="itemside align-items-center ">
+                                    <div class="aside">
+                                        <img class="img-md img-fluid" src="{{ product.image.url }}" alt="">
+                                        <div class="d-inline-block">
+                                            <a href="{% url 'ecapp:detail' product.id %}"
+                                                class="title text-dark h4">{{ product.name }}</a>
+                                            <p class="text-muted small">在庫: {{ product.amount }}</p>
+                                            <p class="text-muted small">出品者: <a
+                                                    href="{% url 'users:user_detail' product.owner.id %}">{{ product.owner.name }}</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </figure>
+                            </td>
+                            <td>
+                                <form action="{% url 'ecapp:change_item_amount' which_cart %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="input-group">
+                                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                                        <input type="submit" name="action_remove" value="-"
+                                            class="btn btn-light input-size">
+                                        <input type="text" readonly='' value="{{ num | intcomma }}" class="input-size">
+                                        <input type="submit" name="action_add" value="+"
+                                            class="btn btn-light input-size">
+                                    </div>
+                                </form>
+                            </td>
+                            <td>
+                                <div class="price-wrap">
+                                    <var class="price">{{ product.price | multiply:num | intcomma }}</var>point
+                                    <var
+                                        class="d-block price text-muted small">単価{{ product.price | intcomma }}point</var>
+                                </div>
+                            </td>
+                            <td class="text-right d-none d-md-block">
+                                <form action="{% url 'ecapp:delete_cart_product' which_cart product.id %}"
+                                    method="POST">
+                                    {% csrf_token %}
+                                    <input type="submit" value="削除" class="btn btn-danger">
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </aside>
+    <aside class="col-lg-3">
+        <div class="card">
+            <div class="card-body pb-0">
+                <form action="{% url 'ecapp:cart' which_cart %}" method="post">{% csrf_token %}
+                    {% if request.user.address %}
+                    <p><strong class="text-muted">{{ request.user.address }}</strong> にお届け</p>
+                    {% else %}
+                    <p class="text-muted">住所が設定されていません</p>
+                    <div class="purchase-form-address">
+                        <div>
+                            {{ purchase_form.non_field_errors }}
+                            {{ purchase_form.zip_code.label_tag }}
+                            {{ purchase_form.zip_code }}
+                            <input class="btn btn-primary my-1" type="submit" name="search_address" value="住所を検索">
+                            <span>{{ purchase_form.zip_code.help_text }}</span>
+                        </div>
+                        <div>
+                            {{ purchase_form.address.label_tag }}
+                            {{ purchase_form.address }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <dl class="dlist-align">
+                        <dt class="d-inline-block">請求額：</dt>
+                        <dd class="text-right text-dark d-inline-block h4">
+                            <strong>{{ total_price | intcomma }}point</strong>
+                        </dd>
+                        <input type="submit" name="buy_product" value="購入する"
+                            class="btn btn-primary d-block mx-auto mt-3 mb-0">
+                    </dl>
+                </form>
+            </div>
+        </div>
+    </aside>
+</div>
+
+{% endblock %}

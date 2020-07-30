@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load filters %}
+
+{% block content %}
+
+<div class="alert alert-danger">
+    <h3>注文履歴</h3>
+</div>
+<div class="coontainer">
+    {% for sale in sales %}
+    <div class="card m-3 shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <aside class="col-sm-4 d-flex align-items-center">
+                    <a href="{% url 'ecapp:detail' sale.product.id %}" class="d-block m-auto">
+                        <img src="{{ sale.product.image.url }}" alt="" class="img-ec d-block m-auto">
+                    </a>
+                </aside>
+                <div class="col-sm-8">
+                    <h2>{{ sale.product.name }}</h2>
+                    <var>価格：<span class="info-value">{{ sale.price | intcomma }}point</span></var>
+                    <div>個数：<span class="info-value">{{ sale.amount | intcomma }}</span></div>
+                    <hr>
+                    <var class="d-block">小計：<span
+                            class="font-weight-bold">{{ sale.price | multiply:sale.amount | intcomma }}</span>point</var>
+                    <span class="font-italic">{{ sale.created_at | date:"Y/m/d" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if sales.has_previous %}
+        <li class="page-item"><a class="page-link" href="{% url 'ecapp:order_history' %}?page=1">&laquo;</a></li>
+        <li class="page-item">
+            <a class="page-link" href="{% url 'ecapp:order_history' %}?page={{ sales.previous_page_number }}">
+                {{ sales.previous_page_number }}</a>
+        </li>
+        {% endif %}
+        <li class="page-item active">
+            <span class="page-link" href="#">{{ sales.number }}</span>
+        </li>
+        {% if sales.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{% url 'ecapp:order_history' %}?page={{ sales.next_page_number }}">
+                {{ sales.next_page_number }}</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{% url 'ecapp:order_history' %}?page={{ sales.paginator.num_pages }}">
+                &raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+{% endblock %}

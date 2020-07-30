@@ -1,0 +1,5 @@
+FROM nginx:1.16
+EXPOSE 8000
+COPY conf/app_nginx.conf /etc/nginx/conf.d/
+COPY uwsgi_params /etc/nginx/uwsgi_params
+CMD /bin/sh -c "envsubst < /etc/nginx/conf.d/app_nginx.conf > /etc/nginx/conf.d/app_nginx.conf && nginx -g 'daemon off;'"

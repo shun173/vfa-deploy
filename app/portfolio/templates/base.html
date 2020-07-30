@@ -1,0 +1,86 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Various Function Application</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block style %}{% endblock %}
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+        <a class="navbar-brand" href="{% url 'users:index' %}">Various Function Application</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">SNS</a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'snsapp:index' %}" class="dropdown-item">TOP</a>
+                        <a href="{% url 'snsapp:good_articles' %}" class="dropdown-item">goodした記事</a>
+                        <a href="{% url 'snsapp:post_article' %}" class="dropdown-item">投稿</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">EC</a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'ecapp:index' %}" class="dropdown-item">TOP</a>
+                        <a href="{% url 'ecapp:fav_products' %}" class="dropdown-item">お気に入り</a>
+                        <a href="{% url 'ecapp:cart' 0 %}" class="dropdown-item">カート</a>
+                        <a href="{% url 'ecapp:order_history' %}" class="dropdown-item">注文履歴</a>
+                        <a href="{% url 'ecapp:sell' %}" class="dropdown-item">出品</a>
+                    </div>
+                </li>
+                {% if request.user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">アカウント</a>
+                    <div class="dropdown-menu">
+                        {% if request.user.icon %}
+                        <img class="dropdown-item rounded-circle img-md mx-auto px-1" src="{{ request.user.icon.url }}"
+                            alt="">
+                        {% else %}
+                        <img class="dropdown-item rounded-circle img-md mx-auto px-1"
+                            src="{% static 'default_icon.jpg' %}" alt="">
+                        {% endif %}
+                        <p class="dropdown-item disabled m-0">{{ request.user.name }}</p>
+                        <p class="dropdown-item disabled m-0">Point: {{ request.user.point | intcomma }}</p>
+                        <a class="dropdown-item" href="{% url 'users:my_page' %}">My Page</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'users:logout' %}"
+                            onclick="return confirm('カート内の商品は全てリセットされます。本当にログアウトしますか？');">ログアウト</a>
+                    </div>
+                </li>
+                {% endif %}
+            </ul>
+            {% if not request.user.is_authenticated %}
+            <span>
+                <a class="btn btn-outline-primary mx-20" href="{% url 'users:login' %}">ログイン</a>
+                <a class="btn btn-outline-primary mx-20" href="{% url 'users:signup' %}">新規登録</a>
+            </span>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        {% for message in messages %}
+        <p class="alert alert-{{ message.tags }} text-center">{{ message }}</p>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </div>
+
+    <script type="text/javascript" src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+    {% block script %}{% endblock %}
+</body>
+
+</html>

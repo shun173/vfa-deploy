@@ -1,0 +1,26 @@
+{% load humanize %}
+
+<div class="container pt-3 border border-danger rounded" id="product">
+    {% if not products %}
+    <h5 class="text-center font-weight-bold text-muted mb-4 mt-1">未投稿</h5>
+    {% endif %}
+    <div class="product_carousel owl-carousel owl-theme">
+        {% for product in products %}
+        <figure class="card card-product-grid shadow-sm">
+            <div class="img-wrap">
+                <span class="topbar">
+                    <product-good ref="{{ product.id }}" data-id="{{ product.id }}"
+                        data-authenticated="{{ request.user.is_authenticated }}"></product-good>
+                </span>
+                <a href="{% url 'ecapp:detail' product.id %}">
+                    <img src="{{ product.image.url }}" class="img-fluid img-lg"></a>
+            </div>
+            <figcaption class="info-wrap text-center border-top">
+                <a href="{% url 'ecapp:detail' product.id %}" class="title text-truncate d-block">{{ product.name }}</a>
+                <small class="text-muted">在庫: {{ product.amount }}</small>
+                <div class="price mt-2"> <strong>{{ product.price | intcomma }}</strong>point</div>
+            </figcaption>
+        </figure>
+        {% endfor %}
+    </div>
+</div>

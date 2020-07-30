@@ -1,0 +1,12 @@
+FROM python:3.6.8
+ENV PYTHONUNBUFFERED 1
+EXPOSE 8001
+RUN mkdir /code
+WORKDIR /code
+ADD portfolio/requirements.txt /code/
+RUN pip install -r requirements.txt
+COPY portfolio/startup.sh /startup.sh
+RUN chmod 744 /startup.sh
+ADD portfolio/ /code/
+ENV DJANGO_READ_DOT_ENV_FILE=True
+CMD ["/startup.sh"]

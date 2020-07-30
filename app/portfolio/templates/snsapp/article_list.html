@@ -1,0 +1,55 @@
+{% if not articles %}
+<h5 class="text-center font-weight-bold text-muted mb-4 mt-1">未投稿</h5>
+{% else %}
+{% for article in articles %}
+<div class="media row mb-3 border-bottom border-info p-3 shadow-sm">
+    <div class="col-3 text-center">
+        <a class="d-inline-block mx-auto"
+            href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+            <img class="img-sm" src="{{ article.product.image.url }}" alt="" class="product-img">
+        </a>
+    </div>
+    <div class="media-body col-9">
+        {% if article.product %}
+        <a class="media-headig h4"
+            href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+            {{ article.product.name }}
+        </a>
+        {% else %}
+        <a class="media-headig h6" href="#">
+            [ 一般コメント ]
+        </a>
+        {% endif %}
+
+        {% if article.author == request.user %}
+        <form action="{% url 'snsapp:delete' article.id %}" method="post" class="d-inline ml-3">
+            {% csrf_token %}
+            <input class="btn btn-outline-danger" type="submit" next="{{ next }}"
+                onclick="return confirm('本当に削除しますか？');" value="削除">
+        </form>
+        {% endif %}
+        {% if article.evaluation %}
+        <ul style="list-style: none;" class="pl-0">
+            <li class="d-inline-block">
+                <star-icon :eval="eval" data-id="1" data-eval="{{ article.evaluation }}"></star-icon>
+                <star-icon :eval="eval" data-id="2" data-eval="{{ article.evaluation }}"></star-icon>
+                <star-icon :eval="eval" data-id="3" data-eval="{{ article.evaluation }}"></star-icon>
+                <star-icon :eval="eval" data-id="4" data-eval="{{ article.evaluation }}"></star-icon>
+                <star-icon :eval="eval" data-id="5" data-eval="{{ article.evaluation }}"></star-icon>
+            </li>
+        </ul>
+        {% endif %}
+        <p>{{ article.content }}</p>
+        <div class="mt-auto float-right">
+            <div class="d-flex align-items-end">
+                <span class="font-italic mr-2">{{ article.created_at | date:"Y/m/d f" }}</span>
+                by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.name }}</a>
+            </div>
+        </div>
+    </div>
+    <article-good id="good" ref="{{ article.id }}" data-id="{{ article.id }}" data-count="{{ article.good_count }}"
+        data-authenticated="{{ request.user.is_authenticated }}">
+    </article-good>
+</div>
+{% endfor %}
+{% endif %}

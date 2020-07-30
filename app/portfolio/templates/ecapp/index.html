@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+{% if 'my_products' in request.path %}
+<div class="alert alert-danger">
+    <h3>出品一覧</h3>
+</div>
+
+{% elif 'fav_products' in request.path %}
+<div class="alert alert-danger">
+    <h3>お気に入り商品</h3>
+</div>
+
+{% else %}
+<div class="alert alert-danger">
+    <h3>EC TOP</h3>
+</div>
+<form action="{% url 'ecapp:index' %}" method="POST" class="search mx-auto row">{% csrf_token %}
+    <div class="input-group col-lg-4 col-md-6 row ml-auto mr-4 mb-4">
+        <div class="col-3 p-0">
+            {{ search_form.select }}
+        </div>
+        <div class="col-8 p-0">
+            {{ search_form.keyword }}
+        </div>
+        <div class="input-group-append col-1 p-0">
+            <button class="btn btn-primary" type="submit">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </div>
+</form>
+{% endif %}
+
+<div class="container-fluid row px-0 pb-5 mx-auto" id="product">
+    {% for product in products %}
+    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3 px-0">
+        <figure class="card card-product-grid shadow-sm">
+            <span class="topbar">
+                <product-good ref="{{ product.id }}" data-id="{{ product.id }}"
+                    data-authenticated="{{ request.user.is_authenticated }}"></product-good>
+            </span>
+            <div class="img-wrap align-items-center">
+                <a href="{% url 'ecapp:detail' product.id %}" class="d-block mx-auto">
+                    <img src="{{ product.image.url }}" class="img-ec d-block mx-auto mb-1"></a>
+            </div>
+            <figcaption class="info-wrap text-center border-top">
+                <a href="{% url 'ecapp:detail' product.id %}" class="title d-block text-truncate">{{ product.name }}</a>
+                <small class="text-muted">在庫: {{ product.amount }}</small>
+                <div class="price mt-2"><strong>{{ product.price | intcomma }}</strong>point</div>
+            </figcaption>
+        </figure>
+    </div>
+    {% endfor %}
+</div>
+
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if products.has_previous %}
+        <li class="page-item"><a class="page-link" href="{% url 'ecapp:index' %}?page=1">&laquo;</a></li>
+        <li class="page-item">
+            <a class="page-link" href="{% url 'ecapp:index' %}?page={{ products.previous_page_number }}">
+                {{ products.previous_page_number }}</a>
+        </li>
+        {% endif %}
+        <li class="page-item active">
+            <span class="page-link" href="#">{{ products.number }}</span>
+        </li>
+        {% if products.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{% url 'ecapp:index' %}?page={{ products.next_page_number }}">
+                {{ products.next_page_number }}</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{% url 'ecapp:index' %}?page={{ products.paginator.num_pages }}">
+                &raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="https://kit.fontawesome.com/c25d00f6dc.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+<script type="text/javascript" src="{% static 'js/product.js' %}"></script>
+{% endblock %}
