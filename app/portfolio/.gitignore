@@ -3,6 +3,7 @@
 *.pyc
 .env
 .ytest_cache/
+.pytest_cache/
 __pycache__/
 mysql/*
 media
