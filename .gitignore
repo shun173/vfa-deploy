@@ -1,8 +1,8 @@
 *.log
 *.pot
 *.pyc
-app/portfolio/.env
+.env
 .ytest_cache/
-*__pycache__/
+__pycache__/
 mysql/*
-app/portfolio/media
+media
