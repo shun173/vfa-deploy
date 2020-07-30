@@ -1,0 +1,8 @@
+*.log
+*.pot
+*.pyc
+.env
+.ytest_cache/
+__pycache__/
+mysql/*
+media
